@@ -12,6 +12,8 @@ reader profile + email ──► Clef (questions) ──► answers ──► ru
 
 Example: ask *"Does this need to be read?"*. If the probability is under 0.15, mark it read.
 
+> **Status: early prototype.** It type-checks and the config loads, but it has not yet been run end to end against a live mailbox. Use the default dry run (read-only) before `--apply`.
+
 ## Concepts
 
 | Piece | What it is |
@@ -97,3 +99,7 @@ src/
 - Watch mode via JMAP push / EventSource
 - Send image attachments to Clef (it's multimodal)
 - Tests for rule matching
+
+## License
+
+[MIT](LICENSE)

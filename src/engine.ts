@@ -1,5 +1,5 @@
 import type { Answer } from "./clef.js";
-import type { Action, Config, Rule, When } from "./config.js";
+import type { Action, Rule, When } from "./config.js";
 import type { EmailSummary, FastmailClient } from "./fastmail.js";
 
 /** Build the state Clef judges: reader profile plus the email. */
@@ -61,5 +61,3 @@ export function describe(action: Action): string {
   if (action.type === "addKeyword") return `addKeyword(${action.keyword})`;
   return action.type;
 }
-
-export type { Config };
