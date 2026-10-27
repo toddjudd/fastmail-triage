@@ -30,7 +30,11 @@ export class FastmailClient {
   private accountId = "";
   private mailboxes: Mailbox[] = [];
 
-  constructor(private readonly token: string) {}
+  /** When readOnly is true, any write (Email/set) throws instead of reaching Fastmail. */
+  constructor(
+    private readonly token: string,
+    private readonly readOnly = true,
+  ) {}
 
   async connect(): Promise<void> {
     const res = await fetch(SESSION_URL, { headers: this.headers() });
@@ -115,6 +119,7 @@ export class FastmailClient {
 
   /** Apply a JMAP patch (e.g. `{"keywords/$seen": true}`) to one email. */
   async patch(emailId: string, patch: Record<string, unknown>): Promise<void> {
+    if (this.readOnly) throw new Error("Refusing to write: Fastmail client is read-only");
     const [[, result]] = (await this.call([
       ["Email/set", { accountId: this.accountId, update: { [emailId]: patch } }, "s"],
     ])) as [[string, { notUpdated?: Record<string, unknown> }, string]];
