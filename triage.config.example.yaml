@@ -1,0 +1,65 @@
+# Copy to triage.config.yaml and edit. triage.config.yaml is gitignored.
+
+profile: |
+  Software engineer. Cares about mail from coworkers, family, bills, and
+  anything needing a reply. Doesn't care about marketing, newsletters he
+  never opens, or automated notifications that need no action.
+
+mailbox: inbox
+unreadOnly: true
+limit: 25
+maxBodyChars: 8000
+
+questions:
+  needs_reading:
+    type: noul
+    instructions: Given the reader profile, does this email need to be read by the reader?
+    criteria:
+      true: The reader would want to read this or would miss something important.
+      false: The reader can safely skip this without reading it.
+  needs_reply:
+    type: noul
+    instructions: Does the sender expect a reply or action from the reader?
+  category:
+    type: choice
+    instructions: What kind of email is this?
+    criteria:
+      personal: From a person the reader knows
+      work: Work or professional correspondence
+      billing: Bills, receipts, payments, invoices
+      notification: Automated alerts or account notifications
+      newsletter: Newsletters and subscriptions
+      promotion: Marketing, sales, and promotions
+  urgency:
+    type: score
+    instructions: How urgent is this email for the reader?
+    criteria: [Whenever, This week, Today, Right now]
+
+rules:
+  - name: urgent and needs reply -> flag
+    when:
+      - { question: needs_reply, gte: 0.8 }
+      - { question: urgency, gte: 2 }
+    actions:
+      - { type: flag }
+
+  - name: promotions -> Promotions folder
+    when:
+      - { question: category, is: promotion, minConfidence: 0.5 }
+      - { question: needs_reading, lt: 0.2 }
+    actions:
+      - { type: markRead }
+      - { type: moveTo, mailbox: Promotions }
+    stop: true
+
+  - name: skip-able -> mark read
+    when:
+      - { question: needs_reading, lt: 0.15 }
+    actions:
+      - { type: markRead }
+
+  - name: billing -> tag
+    when:
+      - { question: category, is: billing }
+    actions:
+      - { type: addKeyword, keyword: billing }
