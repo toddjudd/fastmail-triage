@@ -41,6 +41,7 @@ async function main() {
     host: env("OLLAMA_HOST", "http://localhost:11434"),
     model: env("CLEF_MODEL", "clef"),
     apiKey: process.env.OLLAMA_API_KEY || undefined,
+    timeoutMs: Number(process.env.CLEF_TIMEOUT_MS) || 120_000,
   });
   // Read-only unless --apply: writes throw before reaching Fastmail.
   const mail = new FastmailClient(env("FASTMAIL_API_TOKEN"), !apply);

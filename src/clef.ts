@@ -21,6 +21,7 @@ export interface ClefOptions {
   host: string;
   model: string;
   apiKey?: string;
+  timeoutMs?: number;
 }
 
 /**
@@ -38,6 +39,15 @@ export class ClefClient {
         ...(this.opts.apiKey ? { Authorization: `Bearer ${this.opts.apiKey}` } : {}),
       },
       body: JSON.stringify({ model: this.opts.model, state, questions }),
+      signal: AbortSignal.timeout(this.opts.timeoutMs ?? 120_000),
+    }).catch((err: unknown) => {
+      if (err instanceof Error && err.name === "TimeoutError") {
+        throw new Error(
+          `Clef (${this.opts.model}) did not answer within ${(this.opts.timeoutMs ?? 120_000) / 1000}s. ` +
+            "Check the model with a tiny request, or try CLEF_MODEL=clef-flash / clef:cloud.",
+        );
+      }
+      throw err;
     });
     if (!res.ok) {
       throw new Error(`Clef request failed: ${res.status} ${await res.text()}`);
